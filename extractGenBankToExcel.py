@@ -29,6 +29,7 @@ def wrapper(gen):
 # each element of a list is a dictionary with all
 # of the specified info
 def extract_all_data(x, taxnames):
+    counter = 0
     data = []
     # loop each record
     for record in x:
@@ -56,7 +57,8 @@ def extract_all_data(x, taxnames):
         datadict['description'] = record.description   # description field
         datadict['sequence'] = record.seq              # sequence data
         data.append(datadict)
-    return data
+        counter += 1
+    return data,counter
 
 # gets a list if unique column names for the final table
 def extract_col_names(x):
@@ -68,7 +70,7 @@ def extract_col_names(x):
     return list(colnames.keys())
 
 # generate final table
-def write_final_dataframe(records_dict, column_names):
+def write_final_dataframe(records_dict, column_names, outputfile):
     final_datafile = co.OrderedDict()
     # initialize dictionary
     for col in column_names:
@@ -81,10 +83,11 @@ def write_final_dataframe(records_dict, column_names):
             else:
                 final_datafile[col].append('NA')
     # make data frame in pandas
-    pd.DataFrame.from_dict(final_datafile).to_excel("GenBank_output_table.xlsx")
+    pd.DataFrame.from_dict(final_datafile).to_excel(outputfile)
 
 # prepare data file
-if __name__ == "main":
+if __name__ == "__main__":
+    outputfile = "GenBank_output_table.xlsx"
     # input file first argument
     input_file = sys.argv[1]
     # parse records as iterators
@@ -92,8 +95,11 @@ if __name__ == "main":
     # names of taxonomic groups
     taxon_names = ["phylum","class","order","family","genus"]
     # get all records
-    records_dict = extract_all_data(records, taxon_names)
+    records_dict,number = extract_all_data(records, taxon_names)
+    print("records extracted:", number)
     # get columns
     column_names = extract_col_names(records_dict)
+    print("fields extracted:", len(column_names))
     # write file
-    write_final_dataframe(records_dict, column_names)
+    write_final_dataframe(records_dict, column_names, outputfile)
+    print("output file saved to:",outputfile)
