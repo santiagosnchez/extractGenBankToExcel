@@ -37,7 +37,10 @@ def extract_all_data(x, taxnames):
         datadict = co.defaultdict()
         # splice taxonomy field into list
         for i in range(len(taxnames)):
-            datadict[taxnames[i]] = record.annotations['taxonomy'][i+3]
+            if len(record.annotations['taxonomy'][3:]) >= i+1:
+                datadict[taxnames[i]] = record.annotations['taxonomy'][i+3]
+            else:
+                datadict[taxnames[i]] = 'NA'
         # extract all features available from the "source" block
         # save them to the dictionary
         for i in list(record.features[0].qualifiers.keys()):
